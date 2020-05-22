@@ -56,7 +56,7 @@ import { Card, CardImg, CardText, CardBody,CardTitle} from 'reactstrap';
         }
         return (
            <div className="container"> 
-            <div className='row '> 
+             <div className='row '> 
               <RenderDish dish={dish}/>
               <RenderComments comments={dish.comments}/>              
             </div>
