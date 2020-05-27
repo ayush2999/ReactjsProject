@@ -8,9 +8,9 @@ import { Link } from 'react-router-dom';
             return (<div></div>)
         }
         return(
-        <div className='col-12 col-md-5 m-1'>
+        <div className='col-12 m-1'>
         <h4> Comments </h4>
-        <ul className='list-unstyled' style={{width:"300%"}}>{
+        <ul className='list-unstyled'>{
          comments.map(comment => {
             return (
                 <li key={comment.id}>
@@ -34,8 +34,8 @@ import { Link } from 'react-router-dom';
     function RenderDish({dish}) {
         if (dish != null) {
             return (
-                <div className='col-12 col-md-5 m-1'>
-                    <Card style={{width:"275%"}}>
+                <div className='col-12 m-1'>
+                    <Card>
                         <CardImg src={dish.image} alt={dish.name} />
                         <CardBody>
                             <CardTitle>{dish.name}</CardTitle>
