@@ -31,3 +31,8 @@ address{
 .navbar-dark {
     background-color: #512DA8;
 }
+
+#rating{
+    width: 100%;
+    padding: 8px 0px;
+}
