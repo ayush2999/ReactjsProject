@@ -4,6 +4,9 @@ import { Card, CardImg, CardText, CardBody,
     Col,Label,Row } from 'reactstrap';
 import { Control, LocalForm, Errors } from 'react-redux-form';    
 import { Link } from 'react-router-dom';
+import { FadeTransform, Fade, Stagger } from 'react-animation-components';
+import { Loading } from './LoadingComponent';
+import { baseUrl } from '../shared/baseUrl'
 
 const required = (val) => val && val.length;
 const maxLength = (len) => (val) => !(val) || (val.length <= len);
@@ -17,11 +20,16 @@ class CommentForm extends Component{
             isModalOpen :false
         };
         this.toggleModal=this.toggleModal.bind(this)
+        this.handleSubmit=this.handleSubmit.bind(this)
     }
     toggleModal(){
         this.setState(
          {isModalOpen: !this.state.isModalOpen}
         );
+    }
+    handleSubmit(values){
+        this.toggleModal();
+        this.props.postComment(this.props.dishId, values.rating, values.author, values.comment);
     }
 
     render(){
@@ -31,7 +39,7 @@ class CommentForm extends Component{
             <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
             <ModalHeader toggle={this.toggleModal}>Submit Comment</ModalHeader>
             <ModalBody>
-               <LocalForm>
+               <LocalForm onSubmit={(values) => this.handleSubmit(values)}>
                    <Row className="form-group">
                      <Label htmlFor="rating" md={12}>Rating</Label>
                      <Col md={12}>
@@ -42,9 +50,9 @@ class CommentForm extends Component{
                      </Col>  
                     </Row>   
                    <Row className="form-group">
-                    <Label htmlFor="yourname" md={3}>Your Name</Label>
+                    <Label htmlFor="author" md={3}>Your Name</Label>
                     <Col md={12}>
-                      <Control.text model=".yourname" name="yourname" id="yourname"
+                      <Control.text model=".author" name="author" id="author"
                        placeholder="Your Name"
                        className="form-control"
                        validators={{
@@ -64,9 +72,9 @@ class CommentForm extends Component{
                     </Col>   
                    </Row>    
                    <Row className="form-group">
-                    <Label htmlFor="commentbox" xs={12}>Comment</Label>
+                    <Label htmlFor="comment" xs={12}>Comment</Label>
                     <Col xs={12}>
-                    <Control.textarea model=".commentarea" id="commentarea" name="commentarea"
+                    <Control.textarea model=".comment" id="comment" name="comment"
                      row="12"
                      className="form-control"
                     />
@@ -85,16 +93,20 @@ class CommentForm extends Component{
     }
 }
 
-function RenderComments({comments}) {
-        if (comments == null) {
+function RenderComments({comments, postComment, dishId}) {
+       console.log(postComment);
+        
+       if (comments == null) {
             return (<div></div>)
         }
         return(
         <div className='col-12 m-1'>
         <h4> Comments </h4>
-        <ul className='list-unstyled'>{
-         comments.map(comment => {
+        <ul className='list-unstyled'>
+        <Stagger in>
+        {comments.map(comment => {
             return (
+                <Fade in>
                 <li key={comment.id}>
                     <p>{comment.comment}</p>
                     <p>-- {comment.author},
@@ -106,10 +118,12 @@ function RenderComments({comments}) {
                         }).format(new Date(comment.date))}
                     </p>
                 </li>
+                </Fade>
             );
             })}
+            </Stagger>
             </ul>
-            <CommentForm/>
+            <CommentForm dishId={dishId} postComment={postComment} />
             </div>
         );
     }
@@ -118,13 +132,15 @@ function RenderComments({comments}) {
         if (dish != null) {
             return (
                 <div className='col-12 m-1'>
+                <FadeTransform in transformProps={{exitTransform: 'scale(0.5) translateY(-50%)'}}>
                     <Card>
-                        <CardImg src={dish.image} alt={dish.name} />
+                    <CardImg top src={baseUrl + dish.image} alt={dish.name} />
                         <CardBody>
                             <CardTitle>{dish.name}</CardTitle>
                             <CardText>{dish.description}</CardText>
                         </CardBody>
                     </Card>
+                    </FadeTransform>
                 </div>
             )
         }
@@ -134,9 +150,26 @@ function RenderComments({comments}) {
     }
 
     const  DishDetail = (props) => {
-        if (props == null) {
-            return (<div></div>)
+      
+        if (props.isLoading) {
+            return(
+                <div className="container">
+                    <div className="row">            
+                        <Loading />
+                    </div>
+                </div>
+            );
         }
+        else if (props.errMess) {
+            return(
+                <div className="container">
+                    <div className="row">            
+                        <h4>{props.errMess}</h4>
+                    </div>
+                </div>
+            );
+        }   
+       else if(props.dish != null) {
         return (
             <div className="container">
             <div className="row">
@@ -155,11 +188,18 @@ function RenderComments({comments}) {
                     <RenderDish dish={props.dish} />
                 </div>
                 <div className="col-12 col-md-5 m-1">
-                    <RenderComments comments={props.comments} />
+                <RenderComments comments={props.comments}
+                  postComment={props.postComment}
+                  dishId={props.dish.id}
+                  />
                 </div>
             </div>
             </div>
         );
+        }
+        else{
+            return (<div></div>)
+        }
     }
 
 export default DishDetail
